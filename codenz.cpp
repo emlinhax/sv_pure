@@ -151,18 +151,18 @@ int main(int argc, char* argv[])
     Sleep(5000);
     while (hCsgo == NULL)
     {
-        system(XOR("cls")); //mimimi cry about it. its only every 500ms
-        printf(XOR("Waiting for csgo...\n"));
-        hCsgo = get_process_by_name(XOR("csgo.exe"));
+        system("cls"); //mimimi cry about it. its only every 500ms
+        printf("Waiting for csgo...\n");
+        hCsgo = get_process_by_name("csgo.exe");
         Sleep(500);
     }
 
-    DWORD hEngine = get_module_info(XOR("engine.dll"), &trash);
-    while (hEngine == 0) { hEngine = get_module_info(XOR("engine.dll"), &trash); };
+    DWORD hEngine = get_module_info("engine.dll", &trash);
+    while (hEngine == 0) { hEngine = get_module_info("engine.dll", &trash); };
 
-    printf(XOR("Scanning...\n"));
-    DWORD piClienstate = pattern_scan_in_module(XOR("engine.dll"), clientstate_sig, clientstate_mask);
-    DWORD piCCWSOffset = pattern_scan_in_module(XOR("engine.dll"), CCWS_sig, CCWS_mask);
+    printf("Scanning...\n");
+    DWORD piClienstate = pattern_scan_in_module("engine.dll", clientstate_sig, clientstate_mask);
+    DWORD piCCWSOffset = pattern_scan_in_module("engine.dll", CCWS_sig, CCWS_mask);
     if (piClienstate == -1 || piCCWSOffset == -1)
     {
         printf(XOR("Failed to find offsets!\n"));
@@ -185,18 +185,18 @@ int main(int argc, char* argv[])
     //find a codecave
     size_t iCodecaveSize = 100; //REMEMBER TO CHANGE THIS WHEN MODIFYING THE SHELLCODE
     uintptr_t pCodecave = find_code_cave("KERNELBASE.dll", iCodecaveSize);
-    printf(XOR("Found codecave at: %p\n"), pCodecave);
+    printf("Found codecave at: %p\n", pCodecave);
 
     //write the shellcode to the codecave
     VirtualProtectEx(hCsgo, (LPVOID)pCodecave, iCodecaveSize, PAGE_EXECUTE_READWRITE, &trash2);
     WriteProcessMemory(hCsgo, (LPVOID)pCodecave, shellcode, iCodecaveSize, 0);
     VirtualProtectEx(hCsgo, (LPVOID)pCodecave, iCodecaveSize, PAGE_EXECUTE_READ, &trash2);
-    printf(XOR("Injected shellcode!\n"));
+    printf("Injected shellcode!\n");
 
     //invoke the shellcode in the codecave
     CreateRemoteThread(hCsgo, 0, 0, (LPTHREAD_START_ROUTINE)pCodecave, pShellcodePacket, 0, 0);
 
-    printf(XOR("Done!\n"));
+    printf("Done!\n");
     Sleep(1000);
     CloseHandle(hCsgo);
 }
